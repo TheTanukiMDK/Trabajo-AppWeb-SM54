@@ -25,15 +25,16 @@ function renderAlbum(data) {
         card.className = 'col-md-4';
         card.innerHTML = `
             <div class="card mb-4 shadow-sm">
-                <img class="bd-placeholder-img" width="100%" height="225" src="${item.default_image}">
+                <img class="bd-placeholder-img" width="100%" height="225" src="${item.default_image.medium_url}">
                 <div class="card-body">
-                    <p class="card-text">${item.common_name || 'No name available'}</p>
+                    <h4 class="card-title">${item.common_name || 'No name available'}</h4>
+                    <p class="card-text">${item.cycle}</p>
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="btn-group">
-                            <button type="button" class="btn btn-sm btn-outline-secondary select-btn" data-id="${item.id}">Select</button>
+                            <button type="button" class="btn btn-success select-btn" data-id="${item.id}">Agregar a favorito</button>
                         </div>
-                        <small class="text-muted">ID: ${item.id}</small>
                     </div>
+                    <div class="mt-2 text-success message" style="${selectedItem && selectedItem.id === item.id ? 'display: block;' : 'display: none;'}">Marcado como favorito</div>
                 </div>
             </div>
         `;
@@ -51,7 +52,7 @@ function renderAlbum(data) {
             const itemId = parseInt(button.getAttribute('data-id'));
             const selected = data.find(item => item.id === itemId);
             saveToLocalStorage(selected);
-            highlightSelectedItem(itemId);
+            renderAlbum(data); // Re-render to reflect changes
         });
     });
 }
@@ -59,15 +60,7 @@ function renderAlbum(data) {
 // Save selected item to localStorage
 function saveToLocalStorage(item) {
     localStorage.setItem('selectedItem', JSON.stringify(item));
-}
-
-// Highlight the selected card
-function highlightSelectedItem(selectedId) {
-    document.querySelectorAll('.card').forEach(card => {
-        card.classList.remove('selected');
-    });
-    const selectedCard = document.querySelector(`.select-btn[data-id="${selectedId}"]`).closest('.card');
-    selectedCard.classList.add('selected');
+    console.log("Objeto guardado");
 }
 
 // Fetch and render data on page load
