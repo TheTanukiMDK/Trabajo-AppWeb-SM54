@@ -1,3 +1,24 @@
+body {
+    background-image: url('img/fondo.jpg');
+    /*background-image: url('/img/fondo.jpg');*/
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    color: #fff;
+    height: 100vh;
+
+}
+
+.card-login{
+    background: transparent;
+    border: 2px soild rgba(255, 255, 255, 0.978);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 0 20px rgba(0, 0, 0, .10);
+    color: #ffffff;
+    border-radius: 10px;
+
+}
+
 .centro{
     display: flex;
     justify-content: center;
