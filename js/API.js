@@ -1,67 +1,65 @@
-const API_URL = 'https://perenual.com/api/species-list?key=sk-K66A6532d6b4851bf2593'; // Sample API
 
-// Fetch data from the API
-async function fetchData() {
+async function fetchCharacters() {
     try {
-        const response = await fetch(API_URL);
-        if (!response.ok) throw new Error('Error fetching data');
-        const result = await response.json(); // Almacena toda la respuesta
-        const data = result.data.slice(0, 12); // Accede al campo 'data' y toma los primeros 12 elementos
-        renderAlbum(data);
+        const response = await fetch('https://rickandmortyapi.com/api/character');
+        const data = await response.json();
+        displayCharacters(data.results);
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error fetching data:', error);
     }
 }
 
-// Render album cards dynamically
-function renderAlbum(data) {
+function displayCharacters(characters) {
     const albumContainer = document.getElementById('album-container');
-    albumContainer.innerHTML = ''; // Clear existing content
 
-    const selectedItem = JSON.parse(localStorage.getItem('selectedItem')) || null;
-
-    data.forEach(item => {
+    characters.forEach(character => {
         const card = document.createElement('div');
-        card.className = 'col-md-4';
+        card.classList.add('col-md-4');
+        
+        const isSaved = localStorage.getItem(`character-${character.id}`) !== null;
+        
         card.innerHTML = `
             <div class="card mb-4 shadow-sm">
-                <img class="bd-placeholder-img" width="100%" height="225" src="${item.default_image.medium_url}">
+                <img src="${character.image}" class="bd-placeholder-img card-img-top" alt="${character.name}">
                 <div class="card-body">
-                    <h4 class="card-title">${item.common_name || 'No name available'}</h4>
-                    <p class="card-text">${item.cycle}</p>
+                    <h5 class="card-title">${character.name}</h5>
+                    <p class="card-text">Status: ${character.status}</p>
+                    <p class="card-text">Species: ${character.species}</p>
+                    <p class="card-text">Gender: ${character.gender}</p>
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="btn-group">
-                            <button type="button" class="btn btn-success select-btn" data-id="${item.id}">Agregar a favorito</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary save-btn" data-character='${JSON.stringify(character)}'>Save</button>
                         </div>
+                        <small class="text-muted">ID: ${character.id}</small>
                     </div>
-                    <div class="mt-2 text-success message" style="${selectedItem && selectedItem.id === item.id ? 'display: block;' : 'display: none;'}">Marcado como favorito</div>
+                    ${isSaved ? '<p class="alert alert-success mt-2">Character saved!</p>' : ''}
                 </div>
             </div>
         `;
+
         albumContainer.appendChild(card);
-
-        // Highlight the selected card
-        if (selectedItem && selectedItem.id === item.id) {
-            card.querySelector('.card').classList.add('selected');
-        }
     });
 
-    // Add event listeners to "Select" buttons
-    document.querySelectorAll('.select-btn').forEach(button => {
-        button.addEventListener('click', () => {
-            const itemId = parseInt(button.getAttribute('data-id'));
-            const selected = data.find(item => item.id === itemId);
-            saveToLocalStorage(selected);
-            renderAlbum(data); // Re-render to reflect changes
-        });
+    // Add event listeners to all save buttons
+    const saveButtons = document.querySelectorAll('.save-btn');
+    saveButtons.forEach(button => {
+        button.addEventListener('click', saveCharacter);
     });
 }
 
-// Save selected item to localStorage
-function saveToLocalStorage(item) {
-    localStorage.setItem('selectedItem', JSON.stringify(item));
-    console.log("Objeto guardado");
+function saveCharacter(event) {
+    const button = event.target;
+    const character = JSON.parse(button.getAttribute('data-character'));
+
+    localStorage.setItem(`character-${character.id}`, JSON.stringify(character));
+
+    const cardBody = button.closest('.card-body');
+    if (!cardBody.querySelector('.alert')) {
+        const message = document.createElement('p');
+        message.classList.add('alert', 'alert-success', 'mt-2');
+        message.innerText = 'Character saved!';
+        cardBody.appendChild(message);
+    }
 }
 
-// Fetch and render data on page load
-document.addEventListener('DOMContentLoaded', fetchData);
+document.addEventListener('DOMContentLoaded', fetchCharacters);
